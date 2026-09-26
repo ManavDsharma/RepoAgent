@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Vector index artifacts (Phase 1) — rebuildable, not source
+faiss_index/
+*.faiss
+*.faiss.json
+
+# The target repo is cloned fresh by setup, has its own nested .git, and is
+# never something RepoAgent's own history should track.
+target_repo/
+
+# Editor/OS cruft
+.DS_Store
+.vscode/

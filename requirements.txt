@@ -1,0 +1,32 @@
+# RepoAgent's own environment — the orchestration process (Planner,
+# Implementation Agent, Test Agent, Diff+Explain, LangGraph, API, Streamlit).
+# This runs on the host, NOT in the sandbox container: per TECH_STACK.md,
+# only file writes and test/lint execution against the target repo go
+# through Docker. Pin ranges loosely; tighten once versions are verified.
+
+# Orchestration
+langgraph>=0.2,<0.3
+langchain-core>=0.3,<0.4
+anthropic>=0.34,<1.0
+
+# Repo indexing (Phase 1)
+tree-sitter>=0.23,<0.24
+tree-sitter-python>=0.23,<0.24
+sentence-transformers>=3.0,<4.0
+faiss-cpu>=1.8,<2.0
+
+# Version control ops (git_diff / git_log against the target repo)
+GitPython>=3.1,<4.0
+
+# API layer + frontend (Phase 4)
+fastapi>=0.111,<1.0
+uvicorn[standard]>=0.30,<1.0
+streamlit>=1.38,<2.0
+
+# Shared
+pydantic>=2.7,<3.0
+python-dotenv>=1.0,<2.0
+
+# RepoAgent's own dev/test tooling (not the target repo's)
+pytest>=8.0,<9.0
+ruff>=0.6,<0.7

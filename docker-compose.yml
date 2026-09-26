@@ -1,0 +1,46 @@
+# RepoAgent's execution sandbox (TECH_STACK.md). Two services:
+#
+#   db      — Postgres the target repo needs to even start up (its
+#             app/main.py calls metadata.create_all(engine) on import).
+#   sandbox — Python + target repo deps, target repo mounted as a volume.
+#             RepoAgent's write_file / run_tests / run_linter / git_diff
+#             tools all `docker compose exec sandbox ...` into this.
+#
+# RepoAgent's own orchestration process (LangGraph, Streamlit, FastAPI) runs
+# on the host and is NOT one of these services — only things that touch
+# repo files or execute arbitrary code go through the sandbox.
+
+services:
+  db:
+    image: postgres:15.1-alpine
+    environment:
+      - POSTGRES_USER=hello_fastapi
+      - POSTGRES_PASSWORD=hello_fastapi
+      - POSTGRES_DB=hello_fastapi_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hello_fastapi"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  sandbox:
+    build:
+      context: .
+      dockerfile: docker/sandbox.Dockerfile
+    volumes:
+      - ./target_repo/src:/usr/src/app
+    working_dir: /usr/src/app
+    environment:
+      - DATABASE_URL=postgresql://hello_fastapi:hello_fastapi@db/hello_fastapi_dev
+    depends_on:
+      db:
+        condition: service_healthy
+    tty: true
+    command: ["sleep", "infinity"]
+
+volumes:
+  postgres_data:
