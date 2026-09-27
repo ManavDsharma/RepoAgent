@@ -44,10 +44,19 @@ docker compose up -d --build
 # 4. Confirm the target repo's own tests pass inside the sandbox
 docker compose exec sandbox pytest
 
-# 5. (RepoAgent's own orchestration code, once it exists) — runs on the host:
+# 5. RepoAgent's own orchestration code runs on the host, in its own venv:
 python -m venv .venv && .venv/Scripts/activate  # or source .venv/bin/activate
 pip install -r requirements.txt
+
+# 6. Build the search index (Phase 1) — tree-sitter chunks -> local
+#    embeddings -> FAISS. One-time model download on first run.
+python scripts/build_index.py
+
+# 7. Try it from a script (no LLM involved):
+python -c "from repoagent.indexing import search_code; print(search_code('create a new note'))"
 ```
 
 Reset `target_repo/` to a clean state between demo runs with
-`scripts/reset_target_repo.sh`.
+`scripts/reset_target_repo.sh`. Rebuild the index (step 6) after resetting
+if you've been testing agent edits — `faiss_index/` is gitignored, not
+source, and stale if the target repo has since changed underneath it.
